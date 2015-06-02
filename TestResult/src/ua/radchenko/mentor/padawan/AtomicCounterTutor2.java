@@ -15,7 +15,7 @@ import org.junit.Test;
  * 
  * Попробуйте закомментировать обращение к yield(). Измениться ли значение?
  */
-public class AtomicCounterTutor {
+public class AtomicCounterTutor2 {
 	private Lock lock = new ReentrantLock();
 	int counter = 0;
 
