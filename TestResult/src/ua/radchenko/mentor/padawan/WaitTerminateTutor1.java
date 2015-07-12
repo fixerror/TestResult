@@ -20,7 +20,7 @@ public class WaitTerminateTutor1 {
 	Thread t1, t2;
 	Object monitor = new Object();
 	int runningThreadNumber = 1;
-
+ 
 	class TestThread implements Runnable {
 		String threadName;
 		public boolean shouldTerminate;
@@ -37,17 +37,18 @@ public class WaitTerminateTutor1 {
 					try {
 						while (!threadName.equals("t"+runningThreadNumber)) {
 							System.out.println("wait for thread "+"t"+runningThreadNumber);
-							monitor.wait();
+							monitor.wait(1);
+							Thread.currentThread().interrupt();						
 						}
 					} catch (InterruptedException e) {
 						e.printStackTrace();
+						
 					}
 					runningThreadNumber++;
 					if (runningThreadNumber>2) runningThreadNumber=1;
 					monitor.notifyAll();
 					try {
-						//sleep 1
-						Thread.sleep(1);
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -66,7 +67,7 @@ public class WaitTerminateTutor1 {
 		System.out.println("Starting threads...");
 		t1.start();
 		t2.start();
-
+ 
 		Thread terminator = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -79,7 +80,7 @@ public class WaitTerminateTutor1 {
 			}
 		});
 		terminator.start();
-
+ 
 		System.out.println("Waiting threads to join...");
 	    try {
 			t1.join();
@@ -88,5 +89,5 @@ public class WaitTerminateTutor1 {
 			e.printStackTrace();
 		}
 	}
-
+ 
 }

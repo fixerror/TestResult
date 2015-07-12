@@ -17,62 +17,52 @@ public class WaitTerminateTutor2 {
 	Thread t1, t2;
 	Object monitor = new Object();
 	int runningThreadNumber = 1;
-
+ 
 	class TestThread implements Runnable {
 		String threadName;
 		public boolean shouldTerminate;
-
+		
 		public TestThread(String threadName) {
 			this.threadName = threadName;
 		}
-
+		
 		@Override
 		public void run() {
-			for (int i = 0; i < 100; i++) {
-				System.out.println(threadName + ":" + i);
-				synchronized (monitor) {
+			for (int i=0;i<100;i++) {
+				System.out.println(threadName+":"+i);
+				synchronized(monitor) {
 					try {
-						while (!threadName.equals("t" + runningThreadNumber)) {
-							System.out.println("wait for thread " + "t"
-									+ runningThreadNumber);
-							monitor.wait(10);
+						while (t2.isAlive() &&!threadName.equals("t"+runningThreadNumber)) {
+							System.out.println("wait for thread "+"t"+runningThreadNumber);
+							monitor.wait();
 						}
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					if (!shouldTerminate) {
-						try {
-							monitor.wait(10);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
 					runningThreadNumber++;
-					if (runningThreadNumber > 2)
-						runningThreadNumber = 1;
+					if (runningThreadNumber>2) runningThreadNumber=1;
 					monitor.notifyAll();
 					try {
 						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					if (shouldTerminate)
-						return;
+					if (shouldTerminate) return;
 				}
 			}
 		}
 	}
-
+	
 	@Test
 	public void testThread() {
-		final TestThread testThread1 = new TestThread("t1");
+		TestThread testThread1 = new TestThread("t1");
 		t1 = new Thread(testThread1);
 		final TestThread testThread2 = new TestThread("t2");
 		t2 = new Thread(testThread2);
 		System.out.println("Starting threads...");
 		t1.start();
 		t2.start();
-
+ 
 		Thread terminator = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -81,19 +71,18 @@ public class WaitTerminateTutor2 {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				testThread2.shouldTerminate = false;
-				testThread1.shouldTerminate = false;
+				testThread2.shouldTerminate=true;
 			}
 		});
 		terminator.start();
-
+ 
 		System.out.println("Waiting threads to join...");
-		try {
+	    try {
 			t1.join();
 			t2.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 	}
-
+ 
 }
